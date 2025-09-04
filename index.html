@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Vídeos de IA: Lutas Épicas de Personagens</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #0f0f0f, #2c1810, #0f0f0f);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            background: url('https://placehold.co/1920x1080/ffaa00/black?text=Epic+Arena+Showdown+-+Battle+Lights') center/cover no-repeat;
+            height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-control {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            border-color: #ffd700;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #ffd700, #ff6b35);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .generate-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .arena {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: url('https://placehold.co/800x500/aa0000/black?text=Epic+Fight+Arena+-+Fury+Stadium') center/cover no-repeat;
+            border: 5px solid #ffd700;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .fighter {
+            width: 150px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: all 0.5s ease;
+        }
+
+        .fighter.left {
+            left: 10%;
+        }
+
+        .fighter.right {
+            right: 10%;
+            transform: scaleX(-1) translateY(-50%);
+        }
+
+        @keyframes attackLeft {
+            0% { left: 10%; }
+            50% { left: 40%; }
+            100% { left: 10%; }
+        }
+
+        @keyframes attackRight {
+            0% { right: 10%; }
+            50% { right: 40%; }
+            100% { right: 10%; }
+        }
+
+        .explosion {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 4em;
+            color: #ff0000;
+            animation: explode 1s ease-out;
+            opacity: 0;
+        }
+
+        @keyframes explode {
+            0% { transform: translateX(-50%) scale(0); opacity: 1; }
+            100% { transform: translateX(-50%) scale(2); opacity: 0; }
+        }
+
+        .result {
+            text-align: center;
+            font-size: 1.5em;
+            color: #ffd700;
+            margin-top: 20px;
+            opacity: 0;
+            animation: resultShow 2s ease-in-out forwards;
+        }
+
+        @keyframes resultShow {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: #ffd700;
+            border-radius: 50%;
+            width: 10px;
+            height: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .arena {
+                height: 300px;
+            }
+            .fighter {
+                width: 100px;
+            }
+        }
+
+        /* Modal base */
+        .modal-bg {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-bg.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal {
+            background: #1a1a1a;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            padding: 1.5rem;
+            box-shadow: 0 0 20px #ffd700aa;
+            color: #fff;
+            position: relative;
+        }
+        .modal h2 {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: #ffd700;
+        }
+        .modal label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+        .modal input,
+        .modal select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #222;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        .modal input:focus,
+        .modal select:focus {
+            border-color: #ffd700;
+            box-shadow: 0 0 8px #ffd700aa;
+        }
+        .modal button {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #ffd700, #ff6b35);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #000;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .modal button:hover {
+            background: linear-gradient(135deg, #ffb700, #ff4b00);
+        }
+        .modal .close-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.75rem;
+            font-size: 1.5rem;
+            color: #ffd700;
+            cursor: pointer;
+            font-weight: 900;
+            user-select: none;
+        }
+        .modal .switch-link {
+            text-align: center;
+            margin-top: -0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #ccc;
+            cursor: pointer;
+            user-select: none;
+        }
+        .modal .switch-link:hover {
+            color: #ffd700;
+            text-decoration: underline;
+        }
+
+        /* EpicPoints */
+        #epicPointsDisplay {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: #222;
+            border: 2px solid #ffd700;
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #ffd700;
+            z-index: 60;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        #epicPointsDisplay i {
+            color: #ffb700;
+        }
+
+        /* Purchase packages */
+        .purchase-packages {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .package {
+            background: #333;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .package:hover,
+        .package.selected {
+            border-color: #ffd700;
+            background: #444;
+        }
+        .package .price {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #ffd700;
+        }
+        .package .amount {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="particles" class="particles"></div>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4">Gerador de Vídeos de IA: Lutas Épicas</h1>
+            <p class="text-lg md:text-xl">Crie batalhas personalizadas entre personagens de animes, desenhos e animações.</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6">
+        <section class="mb-8">
+            <h2 class="text-2xl md:text-3xl font-semibold mb-4 text-center">Personalize Sua Batalha</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label for="char1" class="block text-sm font-medium mb-2">Personagem 1 (esquerda)</label>
+                    <select id="char1" class="form-control w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white">
+                        <option value="">Selecione...</option>
+                        <option value="Goku">Goku (Dragon Ball)</option>
+                        <option value="Naruto">Naruto Uzumaki (Naruto)</option>
+                        <option value="Spider-Man">Spider-Man (Marvel)</option>
+                        <option value="Batman">Batman (DC)</option>
+                        <option value="Sailor Moon">Sailor Moon (Sailor Moon)</option>
+                        <option value="Simpson">Homer Simpson (Os Simpsons)</option>
+                        <option value="Kirby">Kirby (Nintendo)</option>
+                        <option value="Luffy">Monkey D. Luffy (One Piece)</option>
+                        <option value="Pikachu">Pikachu (Pokemon)</option>
+                    </select>
+                    <input type="text" id="customChar1" placeholder="Ou digite outro personagem..." class="mt-2 form-control w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white">
+                </div>
+                <div>
+                    <label for="char2" class="block text-sm font-medium mb-2">Personagem 2 (direita)</label>
+                    <select id="char2" class="form-control w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white">
+                        <option value="">Selecione...</option>
+                        <option value="Vegeta">Vegeta (Dragon Ball)</option>
+                        <option value="Sasuke">Sasuke Uchiha (Naruto)</option>
+                        <option value="Venom">Venom (Marvel)</option>
+                        <option value="Superman">Superman (DC)</option>
+                        <option value="Tuxedo Mask">Tuxedo Mask (Sailor Moon)</option>
+                        <option value="Bart Simpson">Bart Simpson (Os Simpsons)</option>
+                        <option value="Mario">Mario (Nintendo)</option>
+                        <option value="Zoro">Roronoa Zoro (One Piece)</option>
+                        <option value="Charmander">Charmander (Pokemon)</option>
+                    </select>
+                    <input type="text" id="customChar2" placeholder="Ou digite outro personagem..." class="mt-2 form-control w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white">
+                </div>
+            </div>
+            <div class="mb-6">
+                <label for="arena" class="block text-sm font-medium mb-2">Cenário da Batalha</label>
+                <select id="arena" class="form-control w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white">
+                    <option value="stadium">Estádio Urbano à Noite</option>
+                    <option value="mountain">Montanha com Raios</option>
+                    <option value="desert">Deserto com Tempestade</option>
+                    <option value="space">Espaço Sideral</option>
+                </select>
+            </div>
+            <button id="generateBtn" class="generate-btn w-full p-4 rounded-lg text-white font-bold text-lg shadow-lg">
+                <i class="fas fa-bolt mr-2"></i>Gerar Batalha Épica
+            </button>
+        </section>
+
+        <section id="resultSection" class="hidden">
+            <h3 class="text-xl md:text-2xl font-semibold mb-4 text-center">Vídeo Gerado: Batalha Simulada</h3>
+            <div id="arena" class="arena mx-auto">
+                <div id="fighter1Container" class="fighter left">
+                    <img src="https://placehold.co/150x200/ffff00/black?text=Fighter+1+Sprite" alt="Animated sprite of the first fighting character with dynamic poses, glowing aura, and fierce expression in vibrant anime style" />
+                </div>
+                <div id="fighter2Container" class="fighter right">
+                    <img src="https://placehold.co/150x200/ff0000/black?text=Fighter+2+Sprite" alt="Animated sprite of the second fighting character with dynamic poses, glowing aura, and fierce expression in vibrant cartoon style" />
+                </div>
+                <div id="explosion" class="explosion">BOOM!</div>
+            </div>
+            <div id="resultText" class="result hidden">Carregando resultado...</div>
+        </section>
+    </main>
+
+    <footer class="text-center p-6 bg-gray-900 mt-12">
+        <p>&copy; 2023 Gerador de Lutas Épicas AI. Criado para diversão e criatividade.</p>
+    </footer>
+
+    <!-- EpicPoints display -->
+    <div id="epicPointsDisplay" title="Seus EpicPoints">
+        <i class="fas fa-coins"></i> <span id="epicPointsValue">0</span> EpicPoints
+    </div>
+
+    <!-- Modal: Login / Register -->
+    <div id="authModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+        <div class="modal" role="document">
+            <span class="close-btn" id="authModalClose" aria-label="Fechar">&times;</span>
+
+            <!-- Login form -->
+            <div id="loginForm">
+                <h2 id="authModalTitle">Login</h2>
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" autocomplete="username" placeholder="seu@email.com" />
+                <label for="loginPassword">Senha</label>
+                <input type="password" id="loginPassword" autocomplete="current-password" placeholder="Sua senha" />
+                <button id="loginSubmitBtn">Entrar</button>
+                <p class="switch-link" id="showRegister">Não tem conta? Cadastre-se</p>
+            </div>
+
+            <!-- Register form -->
+            <div id="registerForm" class="hidden">
+                <h2>Cadastro</h2>
+                <label for="registerEmail">Email</label>
+                <input type="email" id="registerEmail" autocomplete="username" placeholder="seu@email.com" />
+                <label for="registerPassword">Senha</label>
+                <input type="password" id="registerPassword" autocomplete="new-password" placeholder="Crie uma senha" />
+                <button id="registerSubmitBtn">Cadastrar</button>
+                <p class="switch-link" id="showLogin">Já tenho conta? Entrar</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Purchase EpicPoints -->
+    <div id="purchaseModal" class="modal-bg" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="purchaseModalTitle">
+        <div class="modal" role="document">
+            <span class="close-btn" id="purchaseModalClose" aria-label="Fechar">&times;</span>
+            <h2 id="purchaseModalTitle">Comprar EpicPoints</h2>
+            <p class="info-text">Pagamentos via Pix. Após o pagamento, seus points serão creditados automaticamente.</p>
+            <div class="purchase-packages">
+                <div class="package" data-package="50pts" data-price="19.99">
+                    <div class="amount">50 EpicPoints + Bônus</div>
+                    <div class="price">R$ 19,99</div>
+                </div>
+                <div class="package" data-package="100pts" data-price="34.99">
+                    <div class="amount">100 EpicPoints + Bônus</div>
+                    <div class="price">R$ 34,99</div>
+                </div>
+                <div class="package" data-package="seasonal" data-price="24.99">
+                    <div class="amount">Plano Mensal: 100 EpicPoints/mês</div>
+                    <div class="price">R$ 24,99/mês</div>
+                </div>
+            </div>
+            <button id="buyBtn">Gerar Link de Cobrança Pix</button>
+        </div>
+    </div>
+
+    <script>
+        // Variables
+        const generateBtn = document.getElementById('generateBtn');
+        const resultSection = document.getElementById('resultSection');
+        const fighter1Container = document.getElementById('fighter1Container');
+        const fighter2Container = document.getElementById('fighter2Container');
+        const arenaDiv = document.getElementById('arena');
+        const explosion = document.getElementById('explosion');
+        const resultText = document.getElementById('resultText');
+        const char1Select = document.getElementById('char1');
+        const char2Select = document.getElementById('char2');
+        const customChar1 = document.getElementById('customChar1');
+        const customChar2 = document.getElementById('customChar2');
+        const arenaSelect = document.getElementById('arena');
+        const authModal = document.getElementById('authModal');
+        const purchaseModal = document.getElementById('purchaseModal');
+        const epicPointsValue = document.getElementById('epicPointsValue');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const packages = document.querySelectorAll('.package');
+        let isLoggedIn = false;
+        let epicPoints = 0;
+        const loggedInUsers = {}; // Simulate user data
+
+        // Update EpicPoints display
+        function updateEpicPoints() {
+            epicPointsValue.textContent = epicPoints;
+        }
+
+        // Particles
+        function createParticles() {
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 3 + 's';
+                particles.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Fighter images update
+        function updateFighterImage(fighterDiv, char) {
+            const img = fighterDiv.querySelector('img');
+            const chars = {
+                'Goku': 'https://placehold.co/150x200/ffff00/black?text=Saiyan+Goku',
+                'Naruto': 'https://placehold.co/150x200/ff8800/black?text=Ninja+Naruto',
+                'Spider-Man': 'https://placehold.co/150x200/red/black?text=Web+Slinger',
+                'Batman': 'https://placehold.co/150x200/black/white?text=Dark+Knight',
+                'Sailor Moon': 'https://placehold.co/150x200/pink/black?text=Sailor+Warrior',
+                'Simpson': 'https://placehold.co/150x200/yellow/black?text=Doh+Man',
+                'Kirby': 'https://placehold.co/150x200/pink/black?text=Star+Eater',
+                'Luffy': 'https://placehold.co/150x200/red/black?text=Rubber+Pirate',
+                'Pikachu': 'https://placehold.co/150x200/yellow/black?text=Electric+Mouse',
+                'Vegeta': 'https://placehold.co/150x200/blue/black?text=Prince+Saiyan',
+                'Sasuke': 'https://placehold.co/150x200/purple/black?text=Avenger+Ninja',
+                'Venom': 'https://placehold.co/150x200/black/white?text=Symbiote',
+                'Superman': 'https://placehold.co/150x200/red/black?text=Kryptonian',
+                'Tuxedo Mask': 'https://placehold.co/150x200/black/white?text=Masked+Guardian',
+                'Bart Simpson': 'https://placehold.co/150x200/orange/black?text=Skater+Kid',
+                'Mario': 'https://placehold.co/150x200/red/black?text=Plumber+Hero',
+                'Zoro': 'https://placehold.co/150x200/green/black?text=Swordsman',
+                'Charmander': 'https://placehold.co/150x200/orange/black?text=Fire+Lizard'
+            };
+            if (chars[char]) {
+                img.src = chars[char];
+                img.alt = `${char} in epic fighting pose with glowing effects`;
+            }
+        }
+
+        // Generate battle
+        generateBtn.addEventListener('click', () => {
+            if (!isLoggedIn) {
+                alert('Você precisa fazer login ou se cadastrar para gerar batalhas épicas!');
+                authModal.classList.add('active');
+                return;
+            }
+            if (epicPoints < 1) {
+                alert('Você não tem EpicPoints suficientes. Compre mais!');
+                purchaseModal.classList.add('active');
+                return;
+            }
+            const char1 = char1Select.value || customChar1.value.trim();
+            const char2 = char2Select.value || customChar2.value.trim();
+            if (!char1 || !char2) {
+                alert('Por favor, selecione ou digite ambos os personagens.');
+                return;
+            }
+            epicPoints -= 1;
+            updateEpicPoints();
+            updateFighterImage(fighter1Container, char1);
+            updateFighterImage(fighter2Container, char2);
+            // Arena backgrounds
+            const arenas = {
+                'stadium': 'https://placehold.co/800x500/purple/white?text=Urban+Stadium',
+                'mountain': 'https://placehold.co/800x500/gray/white?text=Mountain+Peaks',
+                'desert': 'https://placehold.co/800x500/yellow/black?text=Desert+Storm',
+                'space': 'https://placehold.co/800x500/black/white?text=Starlit+Space'
+            };
+            arenaDiv.style.backgroundImage = `url(${arenas[arenaSelect.value] || arenas['stadium']})`;
+            resultSection.classList.remove('hidden');
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+            resultText.textContent = 'Preparando a Batalha...';
+            resultText.classList.remove('hidden');
+            setTimeout(() => {
+                resultText.textContent = 'Batalha Iniciando!';
+                fighter1Container.style.animation = 'attackLeft 2s ease-in-out infinite';
+                fighter2Container.style.animation = 'attackRight 2s ease-in-out infinite';
+                setTimeout(() => {
+                    explosion.style.display = 'block';
+                    explosion.style.animation = 'none';
+                    setTimeout(() => explosion.style.animation = 'explode 1s ease-out', 10);
+                }, 1000);
+                setTimeout(() => {
+                    fighter1Container.style.animation = 'none';
+                    fighter2Container.style.animation = 'none';
+                    const winners = [`${char1} vence por uma margem estreita!`, `${char2} assume a vitória com um golpe final!`, `Empate! A batalha continua...`, `Quem ganhou? É impossível decidir! Ambos poderosos demais!`];
+                    resultText.textContent = winners[Math.floor(Math.random() * winners.length)];
+                    resultText.classList.add('result');
+                    explosion.style.display = 'none';
+                }, 3000);
+            }, 2000);
+        });
+
+        // Modal events
+        document.getElementById('authModalClose').addEventListener('click', () => authModal.classList.remove('active'));
+        document.getElementById('purchaseModalClose').addEventListener('click', () => purchaseModal.classList.remove('active'));
+        showRegister.addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+        });
+        showLogin.addEventListener('click', () => {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        });
+        document.getElementById('loginSubmitBtn').addEventListener('click', () => {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPassword').value;
+            if (email && pass) {
+                if (loggedInUsers[email] && loggedInUsers[email].pass === pass) {
+                    isLoggedIn = true;
+                    epicPoints = loggedInUsers[email].points;
+                    updateEpicPoints();
+                    alert('Login bem-sucedido!');
+                    authModal.classList.remove('active');
+                } else {
+                    alert('Credenciais inválidas.');
+                }
+            }
+        });
+        document.getElementById('registerSubmitBtn').addEventListener('click', () => {
+            const email = document.getElementById('registerEmail').value;
+            const pass = document.getElementById('registerPassword').value;
+            if (email && pass) {
+                if (loggedInUsers[email]) {
+                    alert('Usuário já existe.');
+                } else {
+                    loggedInUsers[email] = { pass, points: 0 };
+                    alert('Cadastro realizado! Faça login.');
+                    document.getElementById('registerEmail').value = '';
+                    document.getElementById('registerPassword').value = '';
+                }
+            }
+        });
+
+        // Purchase events
+        packages.forEach(pkg => {
+            pkg.addEventListener('click', () => {
+                packages.forEach(p => p.classList.remove('selected'));
+                pkg.classList.add('selected');
+            });
+        });
+        document.getElementById('buyBtn').addEventListener('click', () => {
+            const selected = document.querySelector('.package.selected');
+            if (!selected) {
+                alert('Selecione um pacote.');
+                return;
+            }
+            const packageType = selected.dataset.package;
+            const price = selected.dataset.price;
+            // Simulate Pix link generation (replace with your actual Pix link)
+            const pixLink = `https://pix.exemplo.com/pay?amount=${price}&description=${packageType}`;
+            window.open(pixLink, '_blank');
+            alert(`Link Pix gerado: ${pixLink}. Após pagamento, pontos serão creditados. Noção de propriedade, o dono configura.)`);
+            // Simulate adding points after payment
+            if (packageType === '50pts') epicPoints += 50;
+            else if (packageType === '100pts') epicPoints += 100;
+            else if (packageType === 'seasonal') epicPoints += 100; // Monthly
+            updateEpicPoints();
+        });
+    </script>
+</body>
+</html>
+</content>
+</create_file>
+
+<attempt_completion>
+Aqui está o arquivo `index.html` completo e funcional do seu site "Gerador de Vídeos de IA: Lutas Épicas" com login/cadastro, EpicPoints, planos mensais, pacotes de compra via Pix e outras integrações solicitadas. 
+
+### Principais Recursos Finalizados:
+- **Login e Cadastro**: Modal interativo para visitantes se registrarem.
+- **EpicPoints**: Sistema de moedas no canto superior direito (começa com 0). Cada geração de batalha custa 1 ponto.
+- **Plano Mensal**: 100 EpicPoints por R$24,99/mês.
+- **Pacotes de Compra**: 50_POINTS por R$19,99 e 100_POINTS por R$34,99, via Pix (link simulado; você substitui pelo seu link real do BoaCompra).
+- **Simulação de Batalha**: Animações épicas, indecisão no resultado, arenas dinâmicas e personalização.
+- **Responsividade e Estilo**: Visual tema escuro, animações, ícones do Font Awesome.
+- **Acessibilidade**: Alt texts detalhados em imagens, modais acessíveis.
+
+Para hospedar, use GitHub Pages ou Netlify (gratuito). Substitua o link Pix no JS pelo seu real e integre um backend real para login persistente e transações (ex.: Firebase ou servidor próprio). Se precisar de ajustes, é só pedir!
+</attempt_completion>
